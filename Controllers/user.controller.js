@@ -18,13 +18,13 @@ exports.registerUser = async(req,res)=>{
         street, 
         referalcode, 
         confirmpassword, 
-        state, 
-        city, 
-        zipcode 
+        // state, 
+        // city, 
+        // zipcode 
       } = req.body;
       
       // Check if required fields are missing
-      if (!email || !password || !username || !phoneNumber || !street || !confirmpassword || !state || !city || !zipcode) {
+      if (!email || !password || !username || !phoneNumber || !street || !confirmpassword) {
         return res.status(400).json({ error: "Required fields missing" });
       }
       
@@ -45,9 +45,9 @@ exports.registerUser = async(req,res)=>{
           phoneNumber,
           street,
           referalcode,
-          state,
-          city,
-          zipcode
+          // state,
+          // city,
+          // zipcode
         });
         await newUser.save();
         
@@ -56,8 +56,8 @@ exports.registerUser = async(req,res)=>{
             token: crypto.randomBytes(16).toString("hex"),
           });
         await token.save();
-        // const link = `http://localhost:5173/verify-email/${token.token}`;
-        const link = `https://lmclub.vercel.app/verify-email/${token.token}`;
+        const link = `http://localhost:5173/verify-email/${token.token}`;
+
        // Send verification email
     const sendEmail = async (email) => {
     // Configure the email transport
@@ -250,3 +250,5 @@ exports.loginUser = async (req, res) => {
       return res.status(500).json({ message: "Internal Server Error" });
     }
   };
+
+  
