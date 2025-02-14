@@ -56,8 +56,8 @@ exports.registerUser = async(req,res)=>{
             token: crypto.randomBytes(16).toString("hex"),
           });
         await token.save();
-        const link = `http://localhost:5173/verify-email/${token.token}`;
-
+        // const link = `http://localhost:5173/verify-email/${token.token}`;
+        const link = `https://lmclub.vercel.app/verify-email/${token.token}`;
        // Send verification email
     const sendEmail = async (email) => {
     // Configure the email transport

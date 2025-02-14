@@ -58,8 +58,10 @@ app.post('/create-stripe-session', async (req, res) => {
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
-      success_url: 'http://localhost:5173/payment-success',
-      cancel_url: 'http://localhost:5173/payment-failed',
+      // success_url: 'http://localhost:5173/payment-success',
+      success_url: 'https://lmclub.vercel.app/payment-success',
+      // cancel_url: 'http://localhost:5173/payment-failed',
+      cancel_url: 'https://lmclub.vercel.app//payment-failed',
     });
 
     res.json({ id: session.id });
