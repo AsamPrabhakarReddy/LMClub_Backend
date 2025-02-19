@@ -87,8 +87,10 @@ exports.createOrder = async (line_items) => {
             application_context: {
                 return_url: process.env.PAYPAL_BASE_URL + '/complete-order',
                 // return_url: 'http://localhost:5173/payment-success',
+                // return_url: 'https://lmclub.vercel.app/payment-success',
                 cancel_url: process.env.PAYPAL_BASE_URL + '/cancel-order',
                 // cancel_url: 'http://localhost:5173/payment-failed',
+                // return_url: 'https://lmclub.vercel.app//payment-success',
                 shipping_preference: 'NO_SHIPPING',
                 user_action: 'PAY_NOW',
                 brand_name: 'manfra.io'
