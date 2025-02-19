@@ -8,6 +8,12 @@ const userRoute = require('./Routes/user.route.js');
 const otpRoute = require('./Routes/otp.route.js');
 const contactRoute = require('./Routes/contact.Route.js');
 const stripe = require("stripe")("sk_test_51QMcn82NPQsjFaoT1pDrHh84Fngrl6Qi05UQihwXNmPKtroZxxDGbFMucP6q2L6kIsM6eVYyVvHEphbsaAWU6G4d00uL0KBiT0");
+// const PAYPAL_CLIENT_ID = "AXv6b05ECt52vidXoA8u8SLbfnHMlsZZTECoHQnPnxmb1kpHDW0GMfDIV41H-rVRgEk54irwQlbUl4so";
+// const PAYPAL_SECRET = "ENAnGTfQjbHwrv_QPybyvv5XtJtwy5KnVEvNKzxRgwpa9BD_pjg3ycbM2jqtcJW9cDKMGjoo2sJK5sPG";
+// const PAYPAL_API = "https://api-m.sandbox.paypal.com";
+const paypal = require('./PaypalServices/paypal.js');
+
+
 
 dotenv.config();
 connectDB();
@@ -58,10 +64,8 @@ app.post('/create-stripe-session', async (req, res) => {
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
-      // success_url: 'http://localhost:5173/payment-success',
-      success_url: 'https://lmclub.vercel.app/payment-success',
-      // cancel_url: 'http://localhost:5173/payment-failed',
-      cancel_url: 'https://lmclub.vercel.app//payment-failed',
+      success_url: 'http://localhost:5173/payment-success',
+      cancel_url: 'http://localhost:5173/payment-failed',
     });
 
     res.json({ id: session.id });
@@ -70,6 +74,56 @@ app.post('/create-stripe-session', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+
+
+app.post('/pay', async (req, res) => {
+  try {
+    const { line_items } = req.body; 
+
+    if (!line_items || !Array.isArray(line_items)) {
+      return res.status(400).json({ error: "Invalid request data" });
+    }
+
+    console.log("Received line items:", line_items);
+
+    const url = await paypal.createOrder(line_items); 
+
+    res.json({ approval_url: url });
+  } catch (error) {
+    console.error("Error creating PayPal order:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Complete Order Route
+app.get("/complete-order", async (req, res) => {
+  try {
+    console.log("Received request with query params:", req.query);
+
+    const { token } = req.query;
+    if (!token) {
+      return res.status(400).send("Error: Missing token");
+    }
+
+    const result = await paypal.capturePayment(token);
+
+    // res.send("Membership purchased successfully: " + JSON.stringify(result));
+
+
+    res.json({ message: "Membership purchased successfully", data: result });
+  } catch (error) {
+    console.error("Error in /complete-order:", error.message);
+    res.status(500).send("Error: " + error.message);
+  }
+  // res.send('complete order!');
+});
+
+
+app.get('/cancel-order', (req, res) => {
+  res.redirect('/')
+})
+
 
 
 //global error handler

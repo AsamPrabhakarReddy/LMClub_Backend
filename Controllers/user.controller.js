@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const Swal = require("sweetalert2");
- 
+const sendPdfAfterVerification = require("../utils/Terms_Conditions"); 
 
 exports.registerUser = async(req,res)=>{
   console.log(req.body);
@@ -14,7 +14,7 @@ exports.registerUser = async(req,res)=>{
         email, 
         password, 
         username, 
-        phoneNumber, 
+        phoneNumber,   
         street, 
         referalcode, 
         confirmpassword, 
@@ -56,8 +56,8 @@ exports.registerUser = async(req,res)=>{
             token: crypto.randomBytes(16).toString("hex"),
           });
         await token.save();
-        // const link = `http://localhost:5173/verify-email/${token.token}`;
-        const link = `https://lmclub.vercel.app/verify-email/${token.token}`;
+        const link = `http://localhost:5173/verify-email/${token.token}`;
+
        // Send verification email
     const sendEmail = async (email) => {
     // Configure the email transport
@@ -216,9 +216,10 @@ exports.loginUser = async (req, res) => {
         }
       );
       await tokenModel.findByIdAndDelete(token._id);
+
       await user.save();
       res.status(200).json({ message: "Email Verified Successfully" });
-      
+      await sendPdfAfterVerification(user.email);
       // res.status(200).json({
       //   message: "Email Verified Successfully",
       //   action: "Please login now",
