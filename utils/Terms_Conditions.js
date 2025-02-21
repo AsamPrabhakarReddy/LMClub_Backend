@@ -26,7 +26,7 @@ const sendPdfAfterVerification = async (email) => {
     const mailOptions = {
       from: "noreply@lmclub.club",
       to: email,
-      subject: "Your LMClub Terms & Conditions 📜",
+      subject: "Check LMClub Terms & Conditions",
       html: `
       <!DOCTYPE html>
       <html>
@@ -84,22 +84,29 @@ const sendPdfAfterVerification = async (email) => {
             }
           </style>
         </head>
-        <body>
+      <body>
           <div class="container">
             <div class="header">
-              <h1>Please Find LMCLUB Terms and Conditions</h1>
+              <h1>Welcome to LMCLUB - Terms and Conditions</h1>
             </div>
             <div class="content">
-       
-              <p>Thank you for your interest in joining LMCLUB! To complete your registration, we need you to verify your email address.</p>
+              <p>Thank you for registering with LMCLUB! We are excited to have you onboard.</p>
               
+              <p>As part of the registration process, we want to ensure that you are aware of our Terms and Conditions.</p>
+              
+              <p>Please review the LMCLUB Terms and Conditions carefully by clicking the link below:</p>
+              
+              <p><a href="https://lmclub.vercel.app/terms-and-conditions" target="_blank">View Terms and Conditions</a></p>
+              
+              <p>If you have any questions, feel free to contact our support team.</p>
             </div>
             <div class="footer">
               <p>Best regards,</p>
-              <p>Team LMClub</p>
+              <p>Team LMCLUB</p>
             </div>
           </div>
         </body>
+
       </html>
     `,
       attachments: [
