@@ -93,7 +93,7 @@ exports.createOrder = async (line_items) => {
                 // return_url: 'https://lmclub.vercel.app//payment-success',
                 shipping_preference: 'NO_SHIPPING',
                 user_action: 'PAY_NOW',
-                brand_name: 'manfra.io'
+                brand_name: 'https://lmclub.vercel.app/'
             },
 
         })  
