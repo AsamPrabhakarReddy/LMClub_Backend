@@ -11,5 +11,8 @@ router.get("/check-email-verification", userController.getEmailVerification);
 router.get("/check-email-verification-for-bussiness", userController.getEmailVerificationForBussiness);
 router.post("/bussinessUserRegistration",userController.bussinessUserRegisterUser);
 router.post('/bussiness-login', userController.bussinessLoginUser);
+router.post("/forgotPassword", userController.forgotPassword);
+router.post("/resetPassword/:id/:token", userController.resetPassword);
+
 
 module.exports = router;

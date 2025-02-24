@@ -15,7 +15,11 @@ const bussinessUserSchema = new mongoose.Schema(
         type: Boolean,
         default: false
       },
-      username: {
+      firstName: {
+        type: String,
+        required: true
+      },
+      lastName: {
         type: String,
         required: true
       },

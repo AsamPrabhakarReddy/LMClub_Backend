@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const sendPdfAfterVerification = require("../utils/Terms_Conditions"); 
+
 const userSchema = new mongoose.Schema(
     {
       email: {
@@ -15,7 +15,11 @@ const userSchema = new mongoose.Schema(
         type: Boolean,
         default: false
       },
-      username: {
+      firstName: {
+        type: String,
+        required: true
+      },
+      lastName: {
         type: String,
         required: true
       },
@@ -50,17 +54,6 @@ const userSchema = new mongoose.Schema(
   );
   
 
-
-// userSchema.post("findOneAndUpdate", async function (doc) {
-//   if (doc && doc.verified === true) {
-//     try {
-//       await sendPdfAfterVerification(doc.email);
-//       console.log(`Verification email sent to ${doc.email}`);
-//     } catch (error) {
-//       console.error("Error sending verification email:", error);
-//     }
-//   }
-// });
 
   const userModel = mongoose.model("User", userSchema);
   

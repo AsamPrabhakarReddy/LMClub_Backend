@@ -14,7 +14,8 @@ exports.registerUser = async(req,res)=>{
       const { 
         email, 
         password, 
-        username, 
+        firstName,
+        lastName, 
         phoneNumber,   
         street, 
         referalcode, 
@@ -25,7 +26,7 @@ exports.registerUser = async(req,res)=>{
       } = req.body;
       
       // Check if required fields are missing
-      if (!email || !password || !username || !phoneNumber || !street || !confirmpassword) {
+      if (!email || !password || !firstName || !lastName || !phoneNumber || !street || !confirmpassword) {
         return res.status(400).json({ error: "Required fields missing" });
       }
       
@@ -38,11 +39,18 @@ exports.registerUser = async(req,res)=>{
         if(user){
             return res.json({ message: "User Already Exists" });
         }
+
+        const bussinessUser = await bussinessUserModel.findOne({bussinessEmail: email});
+        if(bussinessUser){
+            return res.json({ message: "User Already Registered as Organization User!" });
+        }
+
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new userModel({
           email,
           password: hashedPassword,
-          username,
+          firstName,
+          lastName,
           phoneNumber,
           street,
           referalcode,
@@ -142,15 +150,17 @@ exports.registerUser = async(req,res)=>{
                 <h1>Verify your email address to complete registration</h1>
               </div>
               <div class="content">
-                <p>Greetings, <span style="font-weight: bold">${email}!</span></p>
-                <p>Thank you for your interest in joining LMCLUB! To complete your registration, we need you to verify your email address.</p>
+                <p>Welcome to LM Club Dear, <span style="font-weight: bold">${firstName}!</span></p>
+                <p>We are thrilled to have you join our community where you can explore, engage, and enjoy a range of exclusive benefits tailored just for you.Whether you're looking to promote your business, discover deals, or connect with the community, LM Club is here to enhance your experience.Your journey with us is just beginning, and we look forward to seeing you grow and thrive within the LM Club.Stay tuned for updates and new features that will continually enhance your experience</p>
                 <div class="button">
                   <a href="${link}">Verify Email</a>
                 </div>
               </div>
               <div class="footer">
-                <p>Best regards,</p>
-                <p>Team LMClub</p>
+                <p>Warm regards,</p>
+                <p>The LM Club Team</p>
+                <p class="header">© 2024 LM Club. All rights reserved.</p>
+              </div>
               </div>
             </div>
           </body>
@@ -261,7 +271,8 @@ exports.bussinessUserRegisterUser = async(req,res)=>{
       const { 
         bussinessEmail, 
         password, 
-        username, 
+        firstName, 
+        lastName,
         phoneNumber,   
         street, 
         referalcode, 
@@ -274,7 +285,7 @@ exports.bussinessUserRegisterUser = async(req,res)=>{
       } = req.body;
       
       // Check if required fields are missing
-      if (!bussinessEmail || !password || !username || !phoneNumber || !street || !confirmpassword || !bussinessName || !bussinessType) {
+      if (!bussinessEmail || !password || !firstName || !lastName || !phoneNumber || !street || !confirmpassword || !bussinessName || !bussinessType) {
         return res.status(400).json({ error: "Required fields missing" });
       }
       
@@ -287,11 +298,18 @@ exports.bussinessUserRegisterUser = async(req,res)=>{
         if(user){
             return res.json({ message: "User Already Exists" });
         }
+
+        const consumerUser = await userModel.findOne({email: bussinessEmail});
+        if(consumerUser){
+            return res.json({ message: "User Already Registered as Consumer User!" });
+        }
+
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new bussinessUserModel({
           bussinessEmail,
           password: hashedPassword,
-          username,
+          firstName,
+          lastName,
           phoneNumber,
           street,
           referalcode,
@@ -393,15 +411,17 @@ exports.bussinessUserRegisterUser = async(req,res)=>{
                 <h1>Verify your email address to complete registration</h1>
               </div>
               <div class="content">
-                <p>Greetings, <span style="font-weight: bold">${bussinessEmail}!</span></p>
-                <p>Thank you for your interest in joining Bussiness User In LMCLUB! To complete your registration, we need you to verify your email address.</p>
+                <p>Welcome to LM Club Dear, <span style="font-weight: bold">${firstName}!</span></p>
+                <p>We are thrilled to have you join our community where you can explore, engage, and enjoy a range of exclusive benefits tailored just for you.Whether you're looking to promote your business, discover deals, or connect with the community, LM Club is here to enhance your experience.Your journey with us is just beginning, and we look forward to seeing you grow and thrive within the LM Club.Stay tuned for updates and new features that will continually enhance your experience</p>
                 <div class="button">
                   <a href="${link}">Verify Email</a>
                 </div>
               </div>
               <div class="footer">
-                <p>Best regards,</p>
-                <p>Team LMClub</p>
+                <p>Warm regards,</p>
+                <p>The LM Club Team</p>
+                <p class="header">© 2024 LM Club. All rights reserved.</p>
+              </div>
               </div>
             </div>
           </body>
@@ -461,10 +481,10 @@ exports.confirmTokenForBussinessRegistration = async (req, res) => {
   // bussiness user registration email verification
   
 exports.getEmailVerificationForBussiness = async (req, res) => {
-  const { email } = req.query; 
+  const { bussinessEmail } = req.query; 
   
   try {
-    const user = await bussinessUserModel.findOne({ email });
+    const user = await bussinessUserModel.findOne({ bussinessEmail });
     
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -506,5 +526,185 @@ exports.bussinessLoginUser = async (req, res) => {
     console.log(error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
+};
+
+
+// forgot password
+
+exports.forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  console.log(email);
+  
+  try {
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      res.status(404).json({ message: "Email Not Found" });
+    }
+    const token = jwt.sign({ id: user._id }, process.env.KEY, {
+      expiresIn: "1d",
+    });
+
+    // const link = `http://localhost:5173/resetPassword/${user._id}/${token}`;
+    const link=`https://lmclub.vercel.app/resetPassword/${user._id}/${token}`;
+    const transporter = nodemailer.createTransport({
+      name: "hostgator",
+      host: "smtp.hostinger.com",
+      port: 587,
+      secure: false,
+      auth: {
+        user: "noreply@lmclub.club",
+        pass: "LMClub@lmclub25",
+      },
+    });
+    var mailOptions = {
+      from: "noreply@lmclub.club",
+      to: email,
+      subject: "Reset Your Password | LMCLUB",
+      html: `<!DOCTYPE html>
+    <html>
+      <head>
+        <style>
+        body {
+          font-family: Arial, sans-serif;
+          height: 100%;
+          width: 100%;
+        }
+  
+        .container {
+          max-width: 600px;
+          margin: 0 auto;
+          padding: 20px;
+          background-color: #fff;
+          border-radius: 5px;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+    
+          .header {
+            text-align: center;
+            margin-bottom: 20px;
+          }
+    
+          .header h1 {
+            color: #333;
+            font-size: 22px;
+            font-weight: 600;
+            text-align: center;
+          }
+    
+          .content {
+            margin-bottom: 30px;
+          }
+    
+          .content p {
+            margin: 0 0 10px;
+            line-height: 1.5;
+          }
+    
+          .content #para p {
+            margin-top: 20px;
+          }
+    
+          .content .button {
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+          }
+    
+          .content .button a {
+            border-radius: 40px;
+            padding-top: 16px;
+            padding-bottom: 16px;
+            padding-left: 100px;
+            padding-right: 100px;
+            background-color: #007ae1;
+            text-decoration: none;
+            color: white;
+            font-weight: 600;
+          }
+    
+          /* .footer {
+            text-align: center;
+          } */
+    
+          .footer p {
+            color: #999;
+            font-size: 14px;
+            margin: 0;
+            margin-top: 8px;
+            margin-bottom: 8px;
+          }
+        </style>
+      </head>
+           <body>
+          <div class="container">
+            <div class="header">
+              <h1>Reset your password</h1>
+            </div>
+            <div class="content">
+              <p>This link will expire in 10 minutes.</p>
+              <p>If it wasn't done by you, please contact us immediately.</p>
+            </div>
+            <div class="button">
+              <a href="${link}"
+                >Reset the password</a
+              >
+            </div>
+            <div class="bottom">
+              <p>Thanks for helping to keep LM Club secure!</p>
+            </div>
+            <div class="footer">
+              <p class="footerOne">Best regards,</p>
+              <p class="footerTwo">Team Syndèo</p>
+            </div>
+          </div>
+        </body>
+    </html>
+      `,
+    };
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.error("Email sending error:", error);
+        return res.json({ status: false, message: "Error in sending mail" });
+      } else {
+        console.log("Email sent:", info.response);
+        return res
+          .status(200)
+          .json({ status: true, message: "Check your mail once", email });
+      }
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+// reset password
+
+exports.resetPassword = async (req, res) => {
+  const { id, token } = req.params;
+  const { password } = req.body;
+  jwt.verify(token, process.env.KEY, (err, decoded) => {
+    if (err) {
+      return res.json({
+        status: false,
+        message: "Error in resetting the password",
+      });
+    } else {
+      bcrypt.hash(password, 10).then((hash) => {
+        userModel
+          .findByIdAndUpdate({ _id: id }, { password: hash })
+          .then((u) => {
+            return res.status(200).json({ message: "Check your mail once" });
+          })
+          .catch((err) => {
+            console.log(error);
+            res.status(500).json({ error: "Internal Server Error" });
+          });
+      });
+    }
+  });
 };
 
